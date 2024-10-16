@@ -32,3 +32,30 @@ func HandleAddUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
   w.WriteHeader(http.StatusCreated);
   return
 }
+
+
+func HandleGetUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+  if db == nil {
+    http.Error(w, "error while connecting to db", http.StatusInternalServerError);
+    return;
+  }
+  id := r.PathValue(ID_PATH_PARAM);
+  if id == "" {
+    http.Error(w, "no id provided", http.StatusNotFound);
+    return;
+  }
+  if _, err := uuid.Parse(id); err != nil {
+    http.Error(w, "invalid uuid provided", http.StatusBadRequest);
+    return;
+  }
+  user, err := repository.GetUser(id, db);
+  if err != nil {
+    http.Error(w, "error while fetching from db", http.StatusInternalServerError);
+    return;
+  }
+  body := ResponseFromUser(user).Json();
+  w.Header().Add("content-type", "application/json");
+  w.WriteHeader(http.StatusOK);
+  w.Write(body);
+  return
+}

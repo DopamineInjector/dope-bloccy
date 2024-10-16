@@ -25,6 +25,15 @@ func AddUser(id string, db *gorm.DB) error {
   return nil
 }
 
+func GetUser(id string, db *gorm.DB) (user *User, err error) {
+  user = &User{}
+  err = db.First(user, "id=?", id).Error;
+  if err != nil {
+    println(err.Error())
+  }
+  return
+}
+
 func generateUserKeys() (pubkey, privkey string, err error) {
   priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
   if err != nil {
