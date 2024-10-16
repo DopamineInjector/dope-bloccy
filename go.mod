@@ -3,6 +3,7 @@ module dope-bloccy
 go 1.23.1
 
 require (
+	github.com/google/uuid v1.4.0
 	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/viper v1.19.0
 	gorm.io/driver/postgres v1.5.9

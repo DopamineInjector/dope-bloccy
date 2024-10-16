@@ -17,5 +17,13 @@ func InitializeDBConnection() (*gorm.DB, error) {
   db := utils.GetConfigString(utils.PostgresDb);
   log.Infof("Attempting to connect to %s @ %s", db, host);
   dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Warsaw", host, user, password, db, port);
-	return gorm.Open(postgres.Open(dsn), &gorm.Config{});
+	conn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{});
+	if err != nil {
+		return nil, err
+	}
+	err = conn.AutoMigrate(&User{});
+	if err != nil {
+		return nil, err
+	}
+	return conn, nil
 }
