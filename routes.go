@@ -16,5 +16,8 @@ func Routes(db *gorm.DB) (router *http.ServeMux) {
   router.HandleFunc("POST /api/wallet/{id}", func(w http.ResponseWriter, r *http.Request) {
     controller.HandleAddUser(w, r, db);
   })
+  router.HandleFunc("GET /api/wallet/{id}", func(w http.ResponseWriter, r *http.Request) {
+    controller.HandleGetUser(w, r, db);
+  })
   return
 }
