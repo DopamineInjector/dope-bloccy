@@ -12,6 +12,8 @@ const (
 	PostgresUser = "postgres.user";
 	PostgresPassword = "postgres.password";
 	PostgresDb = "postgres.db"
+
+	ServerPort = "server.port"
 )
 
 func ReadConfig() error {
@@ -29,6 +31,7 @@ func setDefaults() {
 	setViperDefaultWithKey(PostgresUser, "admin");
 	setViperDefaultWithKey(PostgresPassword, "admin");
 	setViperDefaultWithKey(PostgresDb, "wallets");
+	setViperDefaultWithKey(ServerPort, "80");
 }
 
 func setViperDefaultWithKey(key ConfigKey, value string) {
