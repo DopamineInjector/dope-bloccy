@@ -1,7 +1,9 @@
 package main
 
 import (
+	"dope-bloccy/auth"
 	"dope-bloccy/controller"
+	"dope-bloccy/utils"
 	"log"
 	"net/http"
 
@@ -14,14 +16,27 @@ func Routes(db *gorm.DB) (router *http.ServeMux) {
   }
   router = http.DefaultServeMux;
   router.HandleFunc("POST /api/wallet/{id}", func(w http.ResponseWriter, r *http.Request) {
+    utils.LogRequest(w, r)
+    if !auth.VerifyAuthHeader(w, r) {
+      return
+    }
     controller.HandleAddUser(w, r, db);
   })
   router.HandleFunc("GET /api/wallet/{id}", func(w http.ResponseWriter, r *http.Request) {
+    utils.LogRequest(w, r)
     controller.HandleGetUser(w, r, db);
   })
-	// Nft endpoints
-	router.HandleFunc("GET /api/wallet/{id}/nfts", func(w http.ResponseWriter, r *http.Request) {
-		controller.GetUserNft(w, r, db);
-	})
+  // Nft endpoints
+  router.HandleFunc("GET /api/wallet/{id}/nfts", func(w http.ResponseWriter, r *http.Request) {
+    utils.LogRequest(w, r)
+    controller.GetUserNft(w, r, db);
+  })
+  router.HandleFunc("POST /api/nft/mint", func(w http.ResponseWriter, r *http.Request) {
+    utils.LogRequest(w, r)
+    if !auth.VerifyAuthHeader(w, r) {
+      return
+    }
+    controller.MintNft(w, r, db);
+  })
   return
 }
