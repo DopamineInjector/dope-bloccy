@@ -19,5 +19,9 @@ func Routes(db *gorm.DB) (router *http.ServeMux) {
   router.HandleFunc("GET /api/wallet/{id}", func(w http.ResponseWriter, r *http.Request) {
     controller.HandleGetUser(w, r, db);
   })
+	// Nft endpoints
+	router.HandleFunc("GET /api/wallet/{id}/nfts", func(w http.ResponseWriter, r *http.Request) {
+		controller.GetUserNft(w, r, db);
+	})
   return
 }
