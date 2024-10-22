@@ -14,6 +14,8 @@ const (
 	PostgresDb = "postgres.db"
 
 	ServerPort = "server.port"
+
+	MetadataServer = "nft-server.address"
 )
 
 func ReadConfig() error {
@@ -32,6 +34,7 @@ func setDefaults() {
 	setViperDefaultWithKey(PostgresPassword, "admin");
 	setViperDefaultWithKey(PostgresDb, "wallets");
 	setViperDefaultWithKey(ServerPort, "80");
+	setViperDefaultWithKey(MetadataServer, "http://localhost:5138")
 }
 
 func setViperDefaultWithKey(key ConfigKey, value string) {
