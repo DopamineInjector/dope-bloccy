@@ -10,3 +10,7 @@ port = "80"
 
 [nft-server]
 address = "http://your-nft-metadata-service:80"
+
+[auth]
+enabled = true
+admin_public_key = "admins rsa public key"
