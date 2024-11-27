@@ -15,6 +15,8 @@ const (
   ServerPort = "server.port";
   MetadataServer = "nft-server.address";
   NodeAddress = "node.address"
+  NodePublicKey = "node.public_key"
+  NodePrivateKey = "node.private_key"
   AuthKey = "auth.admin_public_key";
   AuthEnabled = "auth.enabled"
 )

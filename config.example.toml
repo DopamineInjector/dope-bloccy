@@ -13,6 +13,8 @@ address = "http://your-nft-metadata-service:80"
 
 [node]
 address = "http://your-blockchain-node:80"
+public_key = "admin account rsa public key / wallet id"
+private_key = "admin account rsa private key"
 
 [auth]
 enabled = true
