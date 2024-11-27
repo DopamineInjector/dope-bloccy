@@ -4,7 +4,7 @@ import (
 	"sync"
 )
 
-func GetUserNfts(userId string) NftResponse {
+func GetUserNfts(userId []byte) NftResponse {
   // TODO - actually request a node to give info about user nfts
   ids := [2]string{"6a389c77-6bab-4e0c-98b6-4c25ca23c60e", "2bc027ad-573a-4a58-a049-9d6c04800e5c"};
   metadataEntries := getNftsMetadata(ids[:]);

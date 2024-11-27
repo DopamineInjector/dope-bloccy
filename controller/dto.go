@@ -8,7 +8,7 @@ import (
 
 type GetWalletResponse struct {
   Id      string      `json:"id"`
-  PubKey  string      `json:"publicKey"`
+  PubKey  []byte      `json:"publicKey"`
 	Balance float32			`json:"balance"`
   CreatedAt time.Time `json:"created"`
 }

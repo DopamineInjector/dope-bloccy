@@ -13,7 +13,7 @@ func getServerAddress() string {
 	return utils.GetConfigString(utils.NodeAddress);
 }
 
-func GetAccountBalance(walletId string) (float32, error) {
+func GetAccountBalance(walletId []byte) (float32, error) {
   const BALANCE_ENDPOINT = "/api/account/info"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, BALANCE_ENDPOINT)

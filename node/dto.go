@@ -1,7 +1,7 @@
 package node;
 
 type GetAccountInfoDto struct {
-  WalletId string `json:"publicKey"`
+  WalletId []byte `json:"publicKey"`
 }
 
 type AccountInfoResponseDto struct {

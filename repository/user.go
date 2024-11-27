@@ -1,10 +1,9 @@
 package repository
 
 import (
-	"crypto/ecdsa"
-	"crypto/elliptic"
 	"crypto/rand"
-	"encoding/hex"
+	"crypto/rsa"
+	"crypto/x509"
 
 	"gorm.io/gorm"
 )
@@ -34,13 +33,13 @@ func GetUser(id string, db *gorm.DB) (user *User, err error) {
   return
 }
 
-func generateUserKeys() (pubkey, privkey string, err error) {
-  priv, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader);
+func generateUserKeys() (pubkey, privkey []byte, err error) {
+  priv, err := rsa.GenerateKey(rand.Reader, 2048);
   if err != nil {
     return
   }
   pub := priv.PublicKey;
-  privkey = hex.EncodeToString(priv.D.Bytes());
-  pubkey = hex.EncodeToString(append(pub.X.Bytes(), pub.Y.Bytes()...));
+  privkey = x509.MarshalPKCS1PrivateKey(priv);
+  pubkey = x509.MarshalPKCS1PublicKey(&pub);
   return
 }
