@@ -14,6 +14,7 @@ const (
   PostgresDb = "postgres.db";
   ServerPort = "server.port";
   MetadataServer = "nft-server.address";
+  NodeAddress = "node.address"
   AuthKey = "auth.admin_public_key";
   AuthEnabled = "auth.enabled"
 )
@@ -35,6 +36,7 @@ func setDefaults() {
   setViperDefaultWithKey(PostgresDb, "wallets");
   setViperDefaultWithKey(ServerPort, "80");
   setViperDefaultWithKey(MetadataServer, "http://localhost:5138");
+  setViperDefaultWithKey(NodeAddress, "http://localhost:7213");
   setViperDefaultWithKey(AuthKey, "");
   setViperDefaultWithKey(AuthEnabled, "true")
 }
