@@ -1,7 +1,7 @@
-package repository;
+package repository
 
-type UserExistsError struct {}
+type UserExistsError struct{}
 
 func (t *UserExistsError) Error() string {
-  return "user already exists"
+	return "user already exists"
 }

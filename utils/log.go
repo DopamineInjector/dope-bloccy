@@ -7,5 +7,5 @@ import (
 )
 
 func LogRequest(w http.ResponseWriter, r *http.Request) {
-  log.Infof("%s: %s", r.Method, r.URL)
+	log.Infof("%s: %s", r.Method, r.URL)
 }
