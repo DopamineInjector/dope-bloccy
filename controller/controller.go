@@ -28,9 +28,14 @@ func HandleAddUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		http.Error(w, "invalid uuid provided", http.StatusBadRequest)
 		return
 	}
-	err := repository.AddUser(id, db)
+	pubkey, err := repository.AddUser(id, db);
 	if err != nil {
 		http.Error(w, "user already exists", http.StatusConflict)
+		return
+	}
+	err = node.CreateAccount(pubkey);
+	if err != nil {
+		http.Error(w, "error while creating user on da blockchain", http.StatusInternalServerError)
 		return
 	}
 	w.WriteHeader(http.StatusCreated)

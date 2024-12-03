@@ -1,5 +1,9 @@
 package node
 
+type CreateAccountRequest struct {
+	PublicKey []byte `json:"publicKey"`
+}
+
 type GetAccountInfoDto struct {
 	WalletId []byte `json:"publicKey"`
 }

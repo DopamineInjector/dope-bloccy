@@ -8,10 +8,10 @@ import (
 	"gorm.io/gorm"
 )
 
-func AddUser(id string, db *gorm.DB) error {
+func AddUser(id string, db *gorm.DB) ([]byte, error) {
 	pubkey, privkey, err := generateUserKeys()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	err = db.Create(&User{
 		ID:      id,
@@ -19,9 +19,9 @@ func AddUser(id string, db *gorm.DB) error {
 		PrivKey: privkey,
 	}).Error
 	if err != nil {
-		return &UserExistsError{}
+		return nil, &UserExistsError{}
 	}
-	return nil
+	return pubkey, nil
 }
 
 func GetUser(id string, db *gorm.DB) (user *User, err error) {

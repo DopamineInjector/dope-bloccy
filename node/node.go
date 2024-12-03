@@ -7,12 +7,34 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func getServerAddress() string {
 	return utils.GetConfigString(utils.NodeAddress)
+}
+
+func CreateAccount(walletId []byte) error {
+	const CREATE_ACCOUNT_ENDPOINT = "/api/account"
+	address := getServerAddress()
+	url := fmt.Sprintf("%s/%s", address, CREATE_ACCOUNT_ENDPOINT)
+	body := CreateAccountRequest{
+		PublicKey: walletId,
+	}
+	requestBody, _ := json.Marshal(body)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	req.Header.Set("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusCreated {
+		return fmt.Errorf("some errror that should never occur but yet here we are")
+	}
+	return nil
 }
 
 func GetAccountBalance(walletId []byte) (float32, error) {
@@ -79,11 +101,8 @@ func MintNft(recipient []byte, metadataId string) error {
 	const SC_ENDPOINT = "/api/smartContract"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
-	metadataServerAddress := utils.GetConfigString(utils.MetadataServer)
-	const METADATA_ENDPOINT = "metadata"
-	metadataUri := fmt.Sprintf("%s/%s/%s", metadataServerAddress, METADATA_ENDPOINT, metadataId)
 	args := MintNftArgs{
-		MetadataUri: metadataUri,
+		MetadataUri: metadataId,
 		Recipient:   recipient,
 	}
 	jsonArgs, _ := json.Marshal(args)
@@ -174,4 +193,73 @@ func GetUserNfts(userId []byte) ([]int, error) {
 		return nil, err
 	}
 	return tokens, nil
+}
+
+func GetNftMetadata(user []byte, nftId int) (*string, error) {
+	const SC_ENDPOINT = "/api/smartContract"
+	address := getServerAddress()
+	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
+	jsonAgs, _ := json.Marshal(nftId)
+	scAddress := utils.GetConfigString(utils.NodeNftAddress)
+	payload := SmartContractRequestPayload{
+		Entrypoint: "_get_metadata",
+		Args:       string(jsonAgs),
+		Sender:     user,
+		Contract:   []byte(scAddress),
+	}
+	body := SmartContractRequest{
+		Payload:   payload,
+		Signature: nil,
+		IsView:    true,
+	}
+	requestBody, _ := json.Marshal(body)
+	log.Debug(requestBody)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	req.Header.Set("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Warn("Could not reach blockchain node")
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		log.Warn("Metadata has crashed the node. Great.")
+		return nil, fmt.Errorf("i don't know what happened")
+	}
+	responseBody := &SmartContractResponse{}
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Warn("For some reason api is giving bad response.")
+		return nil, err
+	}
+	err = json.Unmarshal(bodyBytes, responseBody)
+	if err != nil {
+		log.Warn("For some reason api is giving bad response. I mean, bad struct")
+		return nil, err
+	}
+	return &responseBody.Output, nil
+}
+
+func GetNftMetadataParallel(user []byte, nfts []int) []string {
+	var wg sync.WaitGroup
+	metaChannel := make(chan string, len(nfts))
+	for _, nft := range nfts {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			meta, err := GetNftMetadata(user, nft)
+			if err == nil {
+				metaChannel <- *meta
+			} else {
+				log.Warnf("Error while parallel fetching nft metadata: %s", err.Error())
+			}
+		}()
+	}
+	wg.Wait()
+	close(metaChannel)
+	var res []string
+	for metadata := range metaChannel {
+		res = append(res, metadata)
+	}
+	return res
 }
