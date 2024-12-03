@@ -6,12 +6,18 @@ type NftMetadata struct {
 	ImageId     string `json:"imageId"`
 }
 
+type NftMetaWithId struct {
+	Metadata NftMetadata
+	TokenId int `json:"tokenId"`
+}
+
 type PostMetadataDTO struct {
 	Description string `json:"description"`
 }
 
 type NftResponseEntry struct {
 	Id          string `json:"id"`
+	TokenId			int `json:"tokenId"`
 	Description string `json:"description"`
 	Image       []byte `json:"image"`
 }

@@ -3,7 +3,7 @@ A http rest server used for interfacing between main application backend and dop
 
 ## Endpoint docs
 ### User management
-#### GET /api/wallet/<user_id>
+#### GET /api/wallet/<user_id> - works
 Fetches info about user's wallet, i.e. public key and creation date.  
 The route param `<user_id` is the id of the user in our backend system
 Response (200):
@@ -15,20 +15,21 @@ class WalletResponseDTO {
 }
 ```
 Throws 404 if user's wallet does not exist in the system
-#### POST /api/wallet/<user_id> (__AUTH__)
+#### POST /api/wallet/<user_id> (__AUTH__) - works
 Creates a new blockchain wallet for a user with `<user_id>` in our backend system.
 Response (201):
 empty
 Throws 409 if user already has a wallet in our system
 
 ### NFT
-#### GET /api/wallet/<user_id>/nfts
+#### GET /api/wallet/<user_id>/nfts - works
 Fetches info about all the nfts that a user with `<user_id>` owns.  
 Response (200):
 ```ts
 class NftResponseDTO {
   nfts: {
     id: string // Nft metadata id
+    tokenId: u64 // Nft id in blockchain
     description: string // NFT description string
     image: string | null // A base64 encoded byte array representing nft image
   }[]
@@ -36,7 +37,7 @@ class NftResponseDTO {
 ```
 Throws 404 if user's wallet does not exist in the system
 
-#### POST /api/nft/mint (__AUTH__)
+#### POST /api/nft/mint (__AUTH__) - works
 Mints a new nft and transfers it to a user's wallet
 Request:
 ```ts
@@ -44,6 +45,20 @@ class MintRequestDTO {
   user: string // User's id in our backend system
   image: string // A base64 encoded byte array representing nft image
   description: // NFT description
+}
+```
+Response (201):
+empty
+
+Throws many things, mostly 500 i think
+#### POST /api/nft/transfer (__AUTH__)
+Transfers nft between users
+Request:
+```ts
+class TransferRequestDTO {
+  sender: string // Sender's id in our backend system
+  recipient: string // Recipient's id in our backend system
+  tokenId: u64 // Nft's id in blockchain (not the metadata uuid) 
 }
 ```
 Response (201):

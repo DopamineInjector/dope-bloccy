@@ -38,7 +38,7 @@ func GetUserNft(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 		return
 	}
 	metadataIds := node.GetNftMetadataParallel(user.PubKey, nftIds)
-	nfts := nft.GetUserNfts(user.PubKey, metadataIds)
+	nfts := nft.GetUserNfts(user.PubKey, metadataIds, nftIds)
 	body, err := json.Marshal(nfts)
 	if err != nil {
 		http.Error(w, "error encoding response", http.StatusInternalServerError)
