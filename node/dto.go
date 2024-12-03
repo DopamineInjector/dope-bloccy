@@ -33,7 +33,15 @@ type SmartContractRequest struct {
 	IsView    bool                        `json:"view"`
 }
 
+type SmartContractResponse struct {
+	Output string `json:"output"`
+}
+
 type MintNftArgs struct {
 	Recipient   []byte `json:"owner"`
 	MetadataUri string `json:"metadata_uri"`
+}
+
+type OwnedByArgs struct {
+	Owner []byte `json:"owner"`
 }

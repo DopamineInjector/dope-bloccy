@@ -120,3 +120,58 @@ func MintNft(recipient []byte, metadataId string) error {
 	}
 	return nil
 }
+
+func GetUserNfts(userId []byte) ([]int, error) {
+	const SC_ENDPOINT = "/api/smartContract"
+	address := getServerAddress()
+	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
+	args := OwnedByArgs{
+		Owner: userId,
+	}
+	jsonAgs, _ := json.Marshal(args)
+	scAddress := utils.GetConfigString(utils.NodeNftAddress)
+	payload := SmartContractRequestPayload{
+		Entrypoint: "_owned_by",
+		Args:       string(jsonAgs),
+		Sender:     userId,
+		Contract:   []byte(scAddress),
+	}
+	body := SmartContractRequest{
+		Payload:   payload,
+		Signature: nil,
+		IsView:    true,
+	}
+	requestBody, _ := json.Marshal(body)
+	log.Debug(requestBody)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	req.Header.Set("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Warn("Could not reach blockchain node")
+		return nil, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		log.Warn("GetUserNfts: node has rejected this stuff for some God forsaken reason, may He have mercy on our souls")
+		return nil, fmt.Errorf("i don't know what happened")
+	}
+	responseBody := &SmartContractResponse{}
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		log.Warn("For some reason api is giving bad response.")
+		return nil, err
+	}
+	err = json.Unmarshal(bodyBytes, responseBody)
+	if err != nil {
+		log.Warn("For some reason api is giving bad response. I mean, bad struct")
+		return nil, err
+	}
+	tokens := make([]int, 0)
+	err = json.Unmarshal([]byte(responseBody.Output), &tokens)
+	if err != nil {
+		log.Warn(responseBody.Output)
+		log.Warn("Could not parse int slice from this res")
+		return nil, err
+	}
+	return tokens, nil
+}
