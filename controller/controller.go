@@ -35,6 +35,7 @@ func HandleAddUser(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	}
 	err = node.CreateAccount(pubkey);
 	if err != nil {
+		log.Warnln(err.Error())
 		http.Error(w, "error while creating user on da blockchain", http.StatusInternalServerError)
 		return
 	}
@@ -104,6 +105,7 @@ func HandleTransfer(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	}
 	err = node.TransferFunds(sender.PubKey, recipient.PubKey, body.Amount, sender.PrivKey)
 	if err != nil {
+		log.Warn(err.Error());
 		http.Error(w, "error while transferring funds", http.StatusInternalServerError)
 		return
 	}

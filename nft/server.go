@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 )
 
 const METADATA_ENDPOINT = "metadata"
@@ -18,7 +19,8 @@ func getServerAddress() string {
 
 func getNft(id string) (*NftMetadata, error) {
 	address := getServerAddress()
-	url := fmt.Sprintf("%s/%s/%s", address, METADATA_ENDPOINT, id)
+	parsedId := strings.ReplaceAll(id, "\n", "");
+	url := fmt.Sprintf("%s/%s/%s", address, METADATA_ENDPOINT, parsedId)
 	resp, err := http.Get(url)
 	if err != nil {
 		return nil, err
@@ -44,10 +46,10 @@ func mintNft(description string) (*NftMetadata, error) {
 	}
 	requestBody, _ := json.Marshal(data)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
 		return nil, fmt.Errorf("Error while minting metadata on nft server")
 	}
@@ -64,10 +66,10 @@ func getAvatar(id string) ([]byte, error) {
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s/%s", address, AVATAR_ENDPOINT, id)
 	resp, err := http.Get(url)
-	defer resp.Body.Close()
 	if err != nil {
 		return nil, err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
 		return nil, err
 	}
@@ -79,10 +81,10 @@ func postAvatar(id string, avatar []byte) error {
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s/%s", address, AVATAR_ENDPOINT, id)
 	resp, err := http.Post(url, "image/png", bytes.NewBuffer(avatar))
-	defer resp.Body.Close()
 	if err != nil {
 		return err
 	}
+	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
 		return fmt.Errorf("Error while creating avatar in metadata server")
 	}

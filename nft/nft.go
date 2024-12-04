@@ -2,9 +2,11 @@ package nft
 
 import (
 	"sync"
+
+	log "github.com/sirupsen/logrus"
 )
 
-func GetUserNfts(userId []byte, ids []string, tokenIds []int) NftResponse {
+func GetUserNfts(ids []string, tokenIds []int) NftResponse {
 	metadataEntries := getNftsMetadata(ids, tokenIds)
 	nftEntries := getNftsImages(metadataEntries)
 	return NftResponse{
@@ -38,6 +40,8 @@ func getNftsMetadata(ids []string, tokenIds []int) []NftMetaWithId {
 					TokenId: tokenIds[i],
 				}
 				metaChannel <- res
+			} else {
+				log.Warnf("getNftsMetadata error: %s", err.Error())
 			}
 		}()
 	}

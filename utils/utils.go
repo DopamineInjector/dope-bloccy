@@ -1,6 +1,11 @@
 package utils
 
-import "github.com/spf13/viper"
+import (
+	"encoding/base64"
+
+	"github.com/sirupsen/logrus"
+	"github.com/spf13/viper"
+)
 
 const CONFIG_NAME = "config"
 
@@ -50,6 +55,16 @@ func setViperDefaultWithKey(key ConfigKey, value string) {
 
 func GetConfigString(key ConfigKey) string {
 	return viper.GetString(string(key))
+}
+
+// Assumes those are stored as a base64 encoded string
+func GetConfigBytes(key ConfigKey) []byte {
+	str := GetConfigString(key);
+	res, err := base64.StdEncoding.DecodeString(str);
+	if err != nil {
+		logrus.Panic(err);
+	}
+	return res;
 }
 
 func GetConfigBool(key ConfigKey) bool {

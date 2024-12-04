@@ -7,19 +7,14 @@ import (
 	"crypto/sha256"
 	"crypto/x509"
 	"dope-bloccy/utils"
-	"encoding/base64"
 	"encoding/json"
 
 	log "github.com/sirupsen/logrus"
 )
 
 func getAdminPrivateKey() *rsa.PrivateKey {
-	stringified := utils.GetConfigString(utils.NodePrivateKey)
-	bytes, err := base64.StdEncoding.DecodeString(stringified)
-	if err != nil {
-		log.Fatalf("could not decode block from privkey in config, %s", err.Error())
-	}
-	res, err := x509.ParsePKCS1PrivateKey(bytes)
+	configKey := utils.GetConfigBytes(utils.NodePrivateKey)
+	res, err := x509.ParsePKCS1PrivateKey(configKey)
 	if err != nil {
 		log.Fatalf("Could not parse private key from config file, %s", err.Error())
 	}

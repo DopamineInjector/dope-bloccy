@@ -17,9 +17,10 @@ func getServerAddress() string {
 }
 
 func CreateAccount(walletId []byte) error {
-	const CREATE_ACCOUNT_ENDPOINT = "/api/account"
+	const CREATE_ACCOUNT_ENDPOINT = "api/account"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, CREATE_ACCOUNT_ENDPOINT)
+	log.Info(url)
 	body := CreateAccountRequest{
 		PublicKey: walletId,
 	}
@@ -32,13 +33,14 @@ func CreateAccount(walletId []byte) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
+		log.Warnf("Node threw up error: %d", resp.StatusCode)
 		return fmt.Errorf("some errror that should never occur but yet here we are")
 	}
 	return nil
 }
 
 func GetAccountBalance(walletId []byte) (float32, error) {
-	const BALANCE_ENDPOINT = "/api/account/info"
+	const BALANCE_ENDPOINT = "api/account/info"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, BALANCE_ENDPOINT)
 	data := GetAccountInfoDto{
@@ -65,7 +67,7 @@ func GetAccountBalance(walletId []byte) (float32, error) {
 }
 
 func TransferFunds(sender, recipient []byte, amount float32, senderPrivKey []byte) error {
-	const TRANSFER_ENDPOINT = "/api/transfer"
+	const TRANSFER_ENDPOINT = "api/transfer"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, TRANSFER_ENDPOINT)
 	payload := TransferRequestPayload{
@@ -91,14 +93,15 @@ func TransferFunds(sender, recipient []byte, amount float32, senderPrivKey []byt
 	defer resp.Body.Close()
 	if resp.StatusCode == http.StatusForbidden {
 		return fmt.Errorf("could not verify signature")
-	} else if resp.StatusCode != http.StatusOK {
+	} else if resp.StatusCode != http.StatusCreated {
+		log.Warn(resp.StatusCode)
 		return fmt.Errorf("some errror that should never occur but yet here we are")
 	}
 	return nil
 }
 
 func MintNft(recipient []byte, metadataId string) error {
-	const SC_ENDPOINT = "/api/smartContract"
+	const SC_ENDPOINT = "api/smartContract"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
 	args := MintNftArgs{
@@ -107,11 +110,11 @@ func MintNft(recipient []byte, metadataId string) error {
 	}
 	jsonArgs, _ := json.Marshal(args)
 	scAddress := utils.GetConfigString(utils.NodeNftAddress)
-	adminId := utils.GetConfigString(utils.NodePublicKey)
+	adminId := utils.GetConfigBytes(utils.NodePublicKey)
 	payload := SmartContractRequestPayload{
 		Entrypoint: "_mint",
 		Args:       string(jsonArgs),
-		Sender:     []byte(adminId),
+		Sender:     adminId,
 		Contract:   []byte(scAddress),
 	}
 	signature := signAdminTransaction(payload)
@@ -121,7 +124,6 @@ func MintNft(recipient []byte, metadataId string) error {
 		IsView:    false,
 	}
 	requestBody, _ := json.Marshal(body)
-	log.Debug(requestBody)
 	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
 	req.Header.Set("content-type", "application/json")
 	resp, err := http.DefaultClient.Do(req)
@@ -141,7 +143,7 @@ func MintNft(recipient []byte, metadataId string) error {
 }
 
 func GetUserNfts(userId []byte) ([]int, error) {
-	const SC_ENDPOINT = "/api/smartContract"
+	const SC_ENDPOINT = "api/smartContract"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
 	args := OwnedByArgs{
@@ -189,14 +191,14 @@ func GetUserNfts(userId []byte) ([]int, error) {
 	err = json.Unmarshal([]byte(responseBody.Output), &tokens)
 	if err != nil {
 		log.Warn(responseBody.Output)
-		log.Warn("Could not parse int slice from this res")
-		return nil, err
+		log.Warn("Could not parse int slice from this res - most likely empty response")
+		return make([]int, 0), nil
 	}
 	return tokens, nil
 }
 
 func GetNftMetadata(user []byte, nftId int) (*string, error) {
-	const SC_ENDPOINT = "/api/smartContract"
+	const SC_ENDPOINT = "api/smartContract"
 	address := getServerAddress()
 	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
 	jsonAgs, _ := json.Marshal(nftId)
