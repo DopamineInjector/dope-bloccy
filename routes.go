@@ -42,5 +42,12 @@ func Routes(db *gorm.DB) (router *http.ServeMux) {
 		}
 		controller.MintNft(w, r, db)
 	})
+	router.HandleFunc("POST /api/nft/transfer", func(w http.ResponseWriter, r *http.Request) {
+		utils.LogRequest(w, r)
+		if !auth.VerifyAuthHeader(w, r) {
+			return
+		}
+		controller.TransferNft(w, r, db)
+	})
 	return
 }

@@ -51,7 +51,7 @@ Response (201):
 empty
 
 Throws many things, mostly 500 i think
-#### POST /api/nft/transfer (__AUTH__)
+#### POST /api/nft/transfer (__AUTH__) - works
 Transfers nft between users
 Request:
 ```ts

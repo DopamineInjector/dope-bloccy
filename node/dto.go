@@ -49,3 +49,9 @@ type MintNftArgs struct {
 type OwnedByArgs struct {
 	Owner []byte `json:"owner"`
 }
+
+type TransferFromArgs struct {
+	From []byte `json:"from"`
+	To []byte `json:"to"`
+	TokenId int `json:"token_id"`
+}

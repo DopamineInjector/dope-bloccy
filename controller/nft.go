@@ -86,3 +86,38 @@ func MintNft(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
 	w.WriteHeader(http.StatusCreated)
 	return
 }
+
+func TransferNft(w http.ResponseWriter, r *http.Request, db *gorm.DB) {
+	body := &nft.TransferNftRequest{}
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		log.Warn(err.Error())
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	err = json.Unmarshal(requestBody, body)
+	if err != nil {
+		log.Warn(err.Error())
+		log.Warn(string(requestBody))
+		http.Error(w, "invalid request", http.StatusBadRequest)
+		return
+	}
+	sender, err := repository.GetUser(body.Sender, db)
+	if err != nil {
+		http.Error(w, "no sender wallet data found", http.StatusNotFound)
+		return
+	}
+	recipient, err := repository.GetUser(body.Recipient, db)
+	if err != nil {
+		http.Error(w, "no recipient wallet data found", http.StatusNotFound)
+		return
+	}
+	err = node.TransferNft(sender.PubKey, recipient.PubKey, body.TokenId, sender.PrivKey);
+	if err != nil {
+		http.Error(w, "error while transferring nft", http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	return
+}
+

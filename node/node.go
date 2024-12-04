@@ -265,3 +265,49 @@ func GetNftMetadataParallel(user []byte, nfts []int) []string {
 	}
 	return res
 }
+
+func TransferNft(sender, recipient []byte, tokenId int, senderKey []byte) error {
+	const SC_ENDPOINT = "api/smartContract"
+	address := getServerAddress()
+	url := fmt.Sprintf("%s/%s", address, SC_ENDPOINT)
+	args := TransferFromArgs{
+		From: sender,
+		To: recipient,
+		TokenId: tokenId,
+	}
+	jsonArgs, _ := json.Marshal(args)
+	scAddress := utils.GetConfigString(utils.NodeNftAddress)
+	payload := SmartContractRequestPayload{
+		Entrypoint: "_transfer_from",
+		Args:       string(jsonArgs),
+		Sender:     sender,
+		Contract:   []byte(scAddress),
+	}
+	signature, err := signUserTransaction(payload, senderKey);
+	if err != nil {
+		log.Warnf("Error while signing transaction for nft transfer: %s", err.Error())
+		return err
+	}
+	body := SmartContractRequest{
+		Payload:   payload,
+		Signature: signature,
+		IsView:    false,
+	}
+	requestBody, _ := json.Marshal(body)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	req.Header.Set("content-type", "application/json")
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		log.Warn("Could not reach blockchain node")
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == http.StatusForbidden {
+		log.Warn("TransferNft: signature verification error - should not happen. ever.")
+		return fmt.Errorf("could not verify signature")
+	} else if resp.StatusCode != http.StatusOK {
+		log.Warn("TransferNft: error in response from node")
+		return fmt.Errorf("some errror that should never occur but yet here we are")
+	}
+	return nil
+}

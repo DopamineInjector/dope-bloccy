@@ -31,3 +31,9 @@ type MintNftRequest struct {
 	Description string `json:"description"`
 	Image       []byte `json:"image"`
 }
+
+type TransferNftRequest struct {
+	Sender string	`json:"sender"`
+	Recipient string `json:"recipient"`
+	TokenId int `json:"tokenId"`
+}
