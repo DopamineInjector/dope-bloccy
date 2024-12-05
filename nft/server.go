@@ -90,6 +90,9 @@ func postAvatar(id string, avatar []byte) error {
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
+		log.Warn(resp.StatusCode)
+		strbody, _ := io.ReadAll(resp.Body);
+		log.Warn(string(strbody))
 		return fmt.Errorf("Error while creating avatar in metadata server")
 	}
 	return nil
