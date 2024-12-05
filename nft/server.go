@@ -8,6 +8,8 @@ import (
 	"io"
 	"net/http"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
 )
 
 const METADATA_ENDPOINT = "metadata"
@@ -47,10 +49,12 @@ func mintNft(description string) (*NftMetadata, error) {
 	requestBody, _ := json.Marshal(data)
 	resp, err := http.Post(url, "application/json", bytes.NewBuffer(requestBody))
 	if err != nil {
+		log.Warn(err.Error())
 		return nil, err
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusCreated {
+		log.Warn(resp.StatusCode)
 		return nil, fmt.Errorf("Error while minting metadata on nft server")
 	}
 	body, err := io.ReadAll(resp.Body)

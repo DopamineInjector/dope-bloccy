@@ -17,10 +17,12 @@ func GetUserNfts(ids []string, tokenIds []int) NftResponse {
 func MintNft(request *MintNftRequest) (*NftMetadata, error) {
 	metadata, err := mintNft(request.Description)
 	if err != nil {
+		log.Warn(err.Error())
 		return nil, err
 	}
 	err = postAvatar(metadata.ImageId, request.Image)
 	if err != nil {
+		log.Warn(err.Error())
 		return nil, err
 	}
 	return metadata, nil
